@@ -7,7 +7,7 @@ const API_KEY = process.env.ALPHA_VANTAGE_API_KEY || 'votre_clé_api';
 const BASE_URL = 'https://www.alphavantage.co/query';
 
 // Délai entre les requêtes pour respecter les limites (max 5 requêtes par minute / 500 par jour)
-const API_DELAY = 12000; // 12 secondes entre chaque requête
+const API_DELAY = 1200; // 12 secondes entre chaque requête
 
 /**
  * Fonction utilitaire pour attendre
