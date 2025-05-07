@@ -34,6 +34,7 @@
   
   <script>
   import axios from 'axios';
+  import { adminService } from '@/services/api';
   
   export default {
     name: 'AdminControls',
@@ -50,31 +51,31 @@
     },
     methods: {
       async getLastUpdateTime() {
-        try {
-          const response = await axios.get('/api/admin/last-update');
-          this.lastUpdate = response.data.lastUpdate ? new Date(response.data.lastUpdate) : null;
-        } catch (error) {
-          console.error('Error getting last update time:', error);
-        }
-      },
+      try {
+        const response = await adminService.getLastUpdateTime();
+        this.lastUpdate = response.data.lastUpdate ? new Date(response.data.lastUpdate) : null;
+      } catch (error) {
+        console.error('Error getting last update time:', error);
+      }
+    },
+          
+    async refreshStocksData() {
+      this.isRefreshing = true;
+      this.refreshMessage = '';
+      this.refreshError = false;
       
-      async refreshStocksData() {
-        this.isRefreshing = true;
-        this.refreshMessage = '';
-        this.refreshError = false;
-        
-        try {
-          const response = await axios.post('/api/admin/refresh-stocks');
-          this.refreshMessage = response.data.message;
-          this.getLastUpdateTime(); // Mettre à jour l'heure
-        } catch (error) {
-          this.refreshError = true;
-          this.refreshMessage = `Erreur: ${error.response?.data?.message || error.message}`;
-          console.error('Error refreshing stocks data:', error);
-        } finally {
-          this.isRefreshing = false;
-        }
-      },
+      try {
+        const response = await adminService.refreshStocksData();
+        this.refreshMessage = response.data.message;
+        this.getLastUpdateTime(); // Mettre à jour l'heure
+      } catch (error) {
+        this.refreshError = true;
+        this.refreshMessage = `Erreur: ${error.response?.data?.message || error.message}`;
+        console.error('Error refreshing stocks data:', error);
+      } finally {
+        this.isRefreshing = false;
+      }
+    },
       
       formatDate(date) {
         return new Date(date).toLocaleString();

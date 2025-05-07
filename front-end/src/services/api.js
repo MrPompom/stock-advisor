@@ -80,3 +80,16 @@ export const searchService = {
       return apiClient.get('/search/market/european');
     }
   };
+
+  // Service pour l'administration
+export const adminService = {
+  // Obtenir la date de dernière mise à jour des prix
+  getLastUpdateTime() {
+    return apiClient.get('/admin/last-update');
+  },
+  
+  // Rafraîchir manuellement les données de prix
+  refreshStocksData() {
+    return apiClient.post('/admin/refresh-stocks');
+  }
+};
