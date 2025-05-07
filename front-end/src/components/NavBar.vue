@@ -7,7 +7,7 @@
             <router-link to="/" class="navbar-logo">Stock Advisor</router-link>
           </div>
           <div class="navbar-menu">
-            <router-link to="/" class="navbar-item" exact>Accueil</router-link>
+            <!--<router-link to="/" class="navbar-item" exact>Accueil</router-link>-->
             <router-link to="/stocks" class="navbar-item">Toutes les Actions</router-link>
             <router-link to="/recommended" class="navbar-item">Actions Recommandées</router-link>
             <router-link to="/admin" class="navbar-item">Administration</router-link>

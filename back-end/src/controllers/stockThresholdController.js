@@ -5,7 +5,7 @@ const logger = require('../utils/logger');
 // Obtenir tous les seuils d'actions
 exports.getAllThresholds = async (req, res) => {
   try {
-    const thresholds = await StockThreshold.find({ isActive: true });
+    const thresholds = await StockThreshold.find();
     res.status(200).json(thresholds);
   } catch (error) {
     logger.error(`Error getting thresholds: ${error.message}`);

@@ -21,7 +21,7 @@ const stockThresholdSchema = new mongoose.Schema({
   },
   isActive: {
     type: Boolean,
-    default: true
+    default: false
   },
   // Nouveaux champs pour stocker les données de prix
   currentPrice: {
