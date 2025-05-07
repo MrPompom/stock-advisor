@@ -1,0 +1,27 @@
+{
+    "name": "stock-advisor",
+    "version": "1.0.0",
+    "description": "Application monorepo pour recommandation d'actions boursières",
+    "private": true,
+    "workspaces": [
+      "front-end",
+      "back-end"
+    ],
+    "scripts": {
+      "dev:front": "cd front-end && npm run serve",
+      "dev:back": "cd back-end && npm run dev",
+      "dev": "concurrently \"npm run dev:front\" \"npm run dev:back\"",
+      "build:front": "cd front-end && npm run build",
+      "build:back": "cd back-end && npm run build",
+      "build": "npm run build:front && npm run build:back",
+      "start": "cd back-end && npm run start"
+    },
+    "devDependencies": {
+      "concurrently": "^8.2.2"
+    },
+    "engines": {
+      "node": ">=18.0.0"
+    },
+    "author": "",
+    "license": "ISC"
+  }

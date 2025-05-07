@@ -1,0 +1,73 @@
+# Dépendances
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Fichiers d'environnement et secrets
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Fichiers de build et de distribution
+/dist
+/build
+/out
+/front-end/dist
+/front-end/build
+/back-end/dist
+/back-end/build
+
+# Fichiers de logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Fichiers de cache
+.cache/
+.npm
+.eslintcache
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+.parcel-cache
+
+# Fichiers d'éditeur
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Fichiers de test
+/coverage
+/.nyc_output
+/cypress/videos/
+/cypress/screenshots/
+
+# Autres fichiers à ignorer
+.DS_Store
+.history/
+.tmp/
+temp/
+
+# Fichiers spécifiques à MongoDB
+*.mongodb
+mongodb.log
+
+# Fichiers spécifiques à Vue.js
+/dist/
+/front-end/node_modules/
+.DS_Store
