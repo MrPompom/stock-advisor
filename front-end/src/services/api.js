@@ -1,7 +1,7 @@
 // front-end/src/services/api.js
 import axios from 'axios';
 
-const API_URL = process.env.VUE_APP_API_URL || 'http://localhost:3000/api';
+const API_URL = process.env.VUE_APP_API_URL;
 
 // Création de l'instance axios avec configuration de base
 const apiClient = axios.create({
