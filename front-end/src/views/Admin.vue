@@ -145,20 +145,24 @@ export default {
     ...mapActions(['fetchThresholds', 'deleteThreshold']),
     // Méthode pour vérifier le code PIN
     verifyPin() {
-      if (this.enteredPin === this.correctPin) {
-        this.isPinVerified = true;
-        this.pinError = '';
-        
-        // Sauvegarder l'authentification dans le stockage local
-        localStorage.setItem(this.storageKey, 'true');
-        
-        // Charger les données une fois authentifié
-        this.fetchThresholds();
-      } else {
-        this.pinError = 'Code PIN incorrect. Veuillez réessayer.';
-        this.enteredPin = '';
-      }
-    },
+    if (this.enteredPin === this.correctPin) {
+      this.isPinVerified = true;
+      this.pinError = '';
+      
+      // Sauvegarder l'authentification dans le stockage local
+      localStorage.setItem(this.storageKey, 'true');
+      
+      // Recharger la page pour mettre à jour la barre de navigation
+      window.location.reload();
+      
+      // Le code ci-dessous ne sera pas exécuté à cause du rechargement,
+      // mais nous le gardons au cas où le rechargement échouerait
+      this.fetchThresholds();
+    } else {
+      this.pinError = 'Code PIN incorrect. Veuillez réessayer.';
+      this.enteredPin = '';
+    }
+  },
     // Méthode pour basculer l'état actif/inactif d'un seuil
     toggleThresholdActive(data) {
       // Supposons que vous avez une action dans votre store pour cela
