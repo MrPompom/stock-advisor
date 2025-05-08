@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const routes = require('./routes');
 const logger = require('./utils/logger');
+const { startStockPriceUpdater } = require('./jobs/stockPriceUpdater');
 
 // Initialisation de l'application Express
 const app = express();
@@ -45,6 +46,11 @@ mongoose
   .connect(MONGODB_URI)
   .then(() => {
     logger.info('Connexion à MongoDB établie');
+    
+    // Démarrer le job de mise à jour des prix après la connexion à MongoDB
+    startStockPriceUpdater();
+    logger.info('Job de mise à jour des prix démarré');
+    
     app.listen(PORT, () => {
       logger.info(`Serveur démarré sur le port ${PORT}`);
     });

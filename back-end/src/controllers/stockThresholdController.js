@@ -1,6 +1,7 @@
 // back-end/src/controllers/stockThresholdController.js
 const { StockThreshold } = require('../models');
 const logger = require('../utils/logger');
+const stockScrapingService = require('../services/stockScrapingService');
 
 // Obtenir tous les seuils d'actions
 exports.getAllThresholds = async (req, res) => {
@@ -27,14 +28,14 @@ exports.getThreshold = async (req, res) => {
   }
 };
 
-// Créer un nouveau seuil
+// Créer un nouveau seuil (version mise à jour avec URL)
 exports.createThreshold = async (req, res) => {
   try {
-    const { symbol, name, thresholdPrice } = req.body;
+    const { symbol, name, thresholdPrice, url, isActive } = req.body;
     
     // Vérification des données requises
-    if (!symbol || !name || thresholdPrice === undefined) {
-      return res.status(400).json({ message: 'Symbole, nom et prix seuil sont requis' });
+    if (!symbol || !name || thresholdPrice === undefined || !url) {
+      return res.status(400).json({ message: 'Symbole, nom, prix seuil et URL sont requis' });
     }
     
     // Vérifier si le symbole existe déjà
@@ -46,10 +47,26 @@ exports.createThreshold = async (req, res) => {
     const newThreshold = new StockThreshold({
       symbol,
       name,
-      thresholdPrice
+      thresholdPrice,
+      url,
+      isActive
     });
+
+    console.log('Données reçues:', { symbol, name, thresholdPrice, url, isActive });
     
     const savedThreshold = await newThreshold.save();
+    
+    // Si l'action est active, récupérer immédiatement le prix
+    if (savedThreshold.isActive) {
+      try {
+        await stockScrapingService.updateStockPrice(savedThreshold._id);
+        logger.info(`Prix initial récupéré pour: ${savedThreshold.symbol}`);
+      } catch (scrapingError) {
+        logger.warn(`Impossible de récupérer le prix initial pour ${savedThreshold.symbol}:`, scrapingError);
+        // On continue quand même, le stock est créé
+      }
+    }
+    
     res.status(201).json(savedThreshold);
   } catch (error) {
     logger.error(`Error creating threshold: ${error.message}`);
@@ -58,14 +75,16 @@ exports.createThreshold = async (req, res) => {
 };
 
 // Mettre à jour un seuil
+// Dans stockThresholdController.js
 exports.updateThreshold = async (req, res) => {
   try {
-    const { thresholdPrice, isActive, name } = req.body;
+    const { thresholdPrice, isActive, name, url } = req.body;
     const updates = {};
     
     if (thresholdPrice !== undefined) updates.thresholdPrice = thresholdPrice;
     if (isActive !== undefined) updates.isActive = isActive;
     if (name !== undefined) updates.name = name;
+    if (url !== undefined) updates.url = url;
     
     const updatedThreshold = await StockThreshold.findByIdAndUpdate(
       req.params.id,
@@ -77,9 +96,23 @@ exports.updateThreshold = async (req, res) => {
       return res.status(404).json({ message: 'Seuil non trouvé' });
     }
     
+    // Si l'action vient d'être activée et n'a pas de prix actuel, récupérer le prix
+    if (updates.isActive === true && !updatedThreshold.currentPrice) {
+      try {
+        const stockWithPrice = await stockScrapingService.updateStockPrice(updatedThreshold._id);
+        logger.info(`Prix récupéré pour l'action nouvellement activée: ${stockWithPrice.symbol}`);
+        return res.status(200).json(stockWithPrice);
+      } catch (scrapingError) {
+        logger.warn(`Impossible de récupérer le prix pour ${updatedThreshold.symbol}:`, scrapingError);
+        // On retourne quand même le threshold mis à jour
+        return res.status(200).json(updatedThreshold);
+      }
+    }
+    
     res.status(200).json(updatedThreshold);
   } catch (error) {
     logger.error(`Error updating threshold: ${error.message}`);
+    logger.error('Stack trace:', error.stack); // Ajout pour plus de détails
     res.status(500).json({ message: 'Erreur lors de la mise à jour du seuil', error: error.message });
   }
 };
@@ -97,5 +130,29 @@ exports.deleteThreshold = async (req, res) => {
   } catch (error) {
     logger.error(`Error deleting threshold: ${error.message}`);
     res.status(500).json({ message: 'Erreur lors de la suppression du seuil', error: error.message });
+  }
+};
+
+// Mettre à jour le prix d'une action spécifique
+exports.updateStockPrice = async (req, res) => {
+  try {
+    const updatedStock = await stockScrapingService.updateStockPrice(req.params.id);
+    logger.info(`Prix mis à jour pour: ${updatedStock.symbol}`);
+    res.json(updatedStock);
+  } catch (error) {
+    logger.error(`Erreur lors de la mise à jour du prix pour ${req.params.id}:`, error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Mettre à jour tous les prix des actions actives
+exports.updateAllPrices = async (req, res) => {
+  try {
+    const result = await stockScrapingService.updateAllActiveStocks();
+    logger.info('Mise à jour manuelle de tous les prix terminée');
+    res.json(result);
+  } catch (error) {
+    logger.error('Erreur lors de la mise à jour de tous les prix:', error);
+    res.status(500).json({ error: error.message });
   }
 };

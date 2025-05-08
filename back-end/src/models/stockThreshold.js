@@ -23,7 +23,20 @@ const stockThresholdSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  // Nouveaux champs pour stocker les données de prix
+  // Nouveau champ pour l'URL
+  url: {
+    type: String,
+    required: false, // Changé temporairement pour permettre les données existantes sans URL
+    trim: true,
+    validate: {
+      validator: function(v) {
+        if (!v) return true; // Permet les valeurs vides pour les données existantes
+        return /^https?:\/\/.+/.test(v);
+      },
+      message: 'URL invalide'
+    }
+  },
+  // Champs pour stocker les données de prix
   currentPrice: {
     type: Number,
     default: null
