@@ -1,6 +1,6 @@
 // back-end/src/controllers/adminController.js
 const { StockThreshold } = require('../models');
-const alphaVantageService = require('../services/alphaVantageService');
+const stockScrapingService = require('../services/stockScrapingService');
 const logger = require('../utils/logger');
 
 // Obtenir la date de dernière mise à jour
@@ -32,22 +32,30 @@ exports.getLastUpdateTime = async (req, res) => {
   }
 };
 
-// Rafraîchir manuellement les données
+// Rafraîchir manuellement les données via scrapping
 exports.refreshStocksData = async (req, res) => {
   console.log('=== DÉBUT refreshStocksData ===');
   try {
-    console.log('Début de la mise à jour des données via Alpha Vantage...');
+    console.log('Début de la mise à jour des données via scrapping...');
     
-    // Appel au service Alpha Vantage pour mettre à jour toutes les actions
-    const updateResult = await alphaVantageService.updateAllStocksData(StockThreshold);
+    // Appel au service de scrapping pour mettre à jour toutes les actions actives
+    const updateResult = await stockScrapingService.updateAllActiveStocks();
     
     console.log('Résultat de la mise à jour:', JSON.stringify(updateResult));
     
+    // Obtenir le nombre total d'actions actives pour un meilleur feedback
+    const activeStocks = await StockThreshold.countDocuments({ isActive: true });
+    
     console.log('=== FIN refreshStocksData ===');
     res.status(200).json({
-      message: `Mise à jour terminée: ${updateResult.success}/${updateResult.total} actions mises à jour`,
-      timestamp: updateResult.timestamp,
-      details: updateResult
+      message: `Mise à jour terminée: ${updateResult.success}/${activeStocks} actions mises à jour`,
+      timestamp: new Date(),
+      details: {
+        total: activeStocks,
+        success: updateResult.success,
+        failed: updateResult.failed,
+        errors: updateResult.errors
+      }
     });
   } catch (error) {
     console.error('ERREUR GLOBALE dans refreshStocksData:', error);

@@ -10,12 +10,6 @@
           <p class="price-label">Prix Actuel</p>
           <p class="price-value">€{{ formatPrice(stock.price) }}</p>
         </div>
-        <div class="stock-change">
-          <p class="change-label">Variation</p>
-          <p class="change-value" :class="getChangeClass(stock.change)">
-            {{ formatChange(stock.change) }} ({{ stock.changePercent }}%)
-          </p>
-        </div>
         <div class="stock-threshold">
           <p class="threshold-label">Seuil Recommandé</p>
           <p class="threshold-value">€{{ formatPrice(stock.thresholdPrice) }}</p>
