@@ -11,6 +11,9 @@
           <router-link to="/recommended" class="navbar-item">Actions Recommandées</router-link>
           <router-link to="/stocks" class="navbar-item">Toutes les Actions</router-link>
           <router-link v-if="isAdminVerified" to="/admin" class="navbar-item">Administration</router-link>
+          <button v-if="isAdminVerified" @click="logout" class="navbar-item navbar-logout">
+            Déconnexion
+          </button>
         </div>
       </div>
     </div>
@@ -18,6 +21,8 @@
 </template>
 
 <script>
+import AuthService from '@/services/auth';
+
 export default {
   name: 'NavBar',
   data() {
@@ -30,16 +35,36 @@ export default {
     this.checkAdminStatus();
     
     // Ajouter un écouteur pour détecter les changements de localStorage (pour les mises à jour en temps réel)
-    window.addEventListener('storage', this.checkAdminStatus);
+    window.addEventListener('storage', this.handleStorageChange);
+    
+    // Ajouter un écouteur personnalisé pour les changements d'authentification
+    window.addEventListener('auth-changed', this.checkAdminStatus);
   },
-  beforeDestroy() {
-    // Nettoyer l'écouteur lors de la destruction du composant
-    window.removeEventListener('storage', this.checkAdminStatus);
+  beforeUnmount() { // ou beforeDestroy pour Vue 2
+    // Nettoyer les écouteurs lors de la destruction du composant
+    window.removeEventListener('storage', this.handleStorageChange);
+    window.removeEventListener('auth-changed', this.checkAdminStatus);
   },
   methods: {
     checkAdminStatus() {
-      // Vérifier si l'administrateur est authentifié
-      this.isAdminVerified = localStorage.getItem('admin_pin_verified') === 'true';
+      // Vérifier si l'administrateur est authentifié avec le nouveau système
+      this.isAdminVerified = AuthService.isAuthenticated();
+    },
+    
+    handleStorageChange(e) {
+      // Réagir spécifiquement aux changements du token admin
+      if (e.key === 'adminToken' || e.key === 'tokenExpiration') {
+        this.checkAdminStatus();
+      }
+    },
+    
+    logout() {
+      AuthService.logout();
+      this.isAdminVerified = false;
+      this.$router.push('/');
+      
+      // Émettre un événement personnalisé pour notifier les autres composants
+      window.dispatchEvent(new CustomEvent('auth-changed'));
     }
   }
 };
@@ -71,6 +96,7 @@ export default {
 .navbar-menu {
   display: flex;
   gap: 20px;
+  align-items: center;
 }
 
 .navbar-item {
@@ -79,6 +105,13 @@ export default {
   font-weight: 500;
   padding: 5px 0;
   position: relative;
+}
+
+.navbar-logout {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .navbar-item::after {

@@ -1,5 +1,6 @@
 // front-end/src/services/api.js
 import axios from 'axios';
+import AuthService from './auth';
 
 const API_URL = process.env.VUE_APP_API_URL;
 
@@ -12,6 +13,34 @@ const apiClient = axios.create({
   },
   timeout: 10000
 });
+
+// Intercepteur pour ajouter le token JWT à chaque requête
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = AuthService.getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Intercepteur pour gérer les erreurs d'authentification
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      // Token invalide ou expiré
+      AuthService.logout();
+      // Rediriger vers la page d'admin pour se reconnecter
+      window.location.href = '/admin';
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Service pour les seuils d'actions (admin)
 export const thresholdService = {
@@ -54,34 +83,32 @@ export const stockService = {
   }
 };
 
-// front-end/src/services/api.js (ajout à la fin du fichier)
-
 // Service pour la recherche d'actions
 export const searchService = {
-    // Rechercher des actions par mot-clé avec différents types de recherche
-    searchStocks(keyword, searchType = 'general', limit = 20, exchange = '') {
-      return apiClient.get('/search', { 
-        params: { 
-          keyword, 
-          type: searchType,
-          limit,
-          exchange
-        } 
-      });
-    },
-    
-    // Obtenir les détails d'une action spécifique (prix, variation, etc.)
-    getStockDetails(symbol) {
-      return apiClient.get(`/search/${symbol}`);
-    },
-    
-    // Obtenir la liste des actions européennes
-    getEuropeanStocks() {
-      return apiClient.get('/search/market/european');
-    }
-  };
+  // Rechercher des actions par mot-clé avec différents types de recherche
+  searchStocks(keyword, searchType = 'general', limit = 20, exchange = '') {
+    return apiClient.get('/search', { 
+      params: { 
+        keyword, 
+        type: searchType,
+        limit,
+        exchange
+      } 
+    });
+  },
+  
+  // Obtenir les détails d'une action spécifique (prix, variation, etc.)
+  getStockDetails(symbol) {
+    return apiClient.get(`/search/${symbol}`);
+  },
+  
+  // Obtenir la liste des actions européennes
+  getEuropeanStocks() {
+    return apiClient.get('/search/market/european');
+  }
+};
 
-  // Service pour l'administration
+// Service pour l'administration
 export const adminService = {
   // Obtenir la date de dernière mise à jour des prix
   getLastUpdateTime() {
@@ -93,3 +120,6 @@ export const adminService = {
     return apiClient.post('/admin/refresh-stocks');
   }
 };
+
+// Export par défaut de l'instance axios configurée
+export default apiClient;

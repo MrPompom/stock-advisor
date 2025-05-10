@@ -2,7 +2,7 @@
 <template>
   <div class="admin">
     <!-- Écran de blocage par code PIN -->
-    <div v-if="!isPinVerified" class="pin-overlay">
+    <div v-if="!isAuthenticated" class="pin-overlay">
       <div class="pin-container">
         <h2>Accès Restreint</h2>
         <p>Veuillez saisir le code PIN pour accéder à l'administration</p>
@@ -22,15 +22,21 @@
           {{ pinError }}
         </div>
         
-        <button @click="verifyPin" class="btn btn-primary">Valider</button>
+        <button 
+          @click="verifyPin" 
+          class="btn btn-primary"
+          :disabled="isVerifying"
+        >
+          {{ isVerifying ? 'Vérification...' : 'Valider' }}
+        </button>
       </div>
     </div>
 
-    <!-- Contenu normal de la page admin (visible uniquement si le PIN est validé) -->
+    <!-- Contenu normal de la page admin (visible uniquement si authentifié) -->
     <template v-else>
       <h1 class="page-title">Administration</h1>
       <!-- Intégrer les contrôles administrateur -->
-      <admin-controls />
+      <admin-controls @logout="logout" />
       
       <div class="admin-header">
         <p class="admin-desc">Gérez les seuils de prix pour vos actions suivies</p>
@@ -101,6 +107,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import ThresholdItem from '@/components/ThresholdItem.vue';
 import AdminControls from '@/components/AdminControls.vue';
+import AuthService from '@/services/auth';
 
 export default {
   name: 'Admin',
@@ -110,12 +117,10 @@ export default {
   },
   data() {
     return {
-      // Système de code PIN
-      isPinVerified: false,
+      isAuthenticated: false,
       enteredPin: '',
-      correctPin: '1702',
       pinError: '',
-      storageKey: 'admin_pin_verified'
+      isVerifying: false
     };
   },
   computed: {
@@ -132,41 +137,71 @@ export default {
       return this.thresholds.filter(threshold => !threshold.isActive);
     }
   },
-  created() {
-    // Vérifier si l'utilisateur a déjà été authentifié
-    const isPinVerified = localStorage.getItem(this.storageKey) === 'true';
+  async created() {
+    // Vérifier l'authentification
+    this.isAuthenticated = AuthService.isAuthenticated();
     
-    if (isPinVerified) {
-      this.isPinVerified = true;
-      this.fetchThresholds();
+    if (this.isAuthenticated) {
+      // Vérifier la validité du token côté serveur
+      try {
+        const isValid = await AuthService.verifyToken();
+        if (isValid) {
+          this.fetchThresholds();
+        } else {
+          this.isAuthenticated = false;
+          AuthService.logout();
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification du token:', error);
+        this.isAuthenticated = false;
+        AuthService.logout();
+      }
     }
   },
+  
   methods: {
     ...mapActions(['fetchThresholds', 'deleteThreshold']),
-    // Méthode pour vérifier le code PIN
-    verifyPin() {
-    if (this.enteredPin === this.correctPin) {
-      this.isPinVerified = true;
-      this.pinError = '';
-      
-      // Sauvegarder l'authentification dans le stockage local
-      localStorage.setItem(this.storageKey, 'true');
-      
-      // Recharger la page pour mettre à jour la barre de navigation
-      window.location.reload();
-      
-      // Le code ci-dessous ne sera pas exécuté à cause du rechargement,
-      // mais nous le gardons au cas où le rechargement échouerait
+    
+    // Dans Admin.vue, après une connexion réussie
+async verifyPin() {
+  if (this.isVerifying || !this.enteredPin) return;
+  
+  try {
+    this.isVerifying = true;
+    this.pinError = '';
+    
+    const result = await AuthService.verifyPin(this.enteredPin);
+    if (result.success) {
+      this.isAuthenticated = true;
       this.fetchThresholds();
-    } else {
-      this.pinError = 'Code PIN incorrect. Veuillez réessayer.';
-      this.enteredPin = '';
+      
+      // Émettre un événement pour notifier la navbar
+      window.dispatchEvent(new CustomEvent('auth-changed'));
+      
+      // Redirection si nécessaire
+      const redirect = this.$route.query.redirect;
+      if (redirect) {
+        this.$router.push(redirect);
+      }
     }
-  },
+  } catch (error) {
+    this.pinError = error.message || 'Code PIN incorrect';
+    this.enteredPin = '';
+  } finally {
+    this.isVerifying = false;
+  }
+},
+    
     // Méthode pour basculer l'état actif/inactif d'un seuil
     toggleThresholdActive(data) {
-      // Supposons que vous avez une action dans votre store pour cela
       this.$store.dispatch('toggleThresholdActive', data);
+    },
+    
+    // Méthode pour déconnexion
+    logout() {
+      AuthService.logout();
+      this.isAuthenticated = false;
+      this.$router.push('/');
     }
   }
 };
@@ -292,5 +327,26 @@ export default {
   background-color: #f9fafb;
   border-radius: 8px;
   color: #718096;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.loading-spinner {
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>
