@@ -9,6 +9,8 @@ const router = express.Router();
 // Routes pour les données d'actions
 router.get('/', stockController.getAllStocks);
 router.get('/recommended', stockController.getRecommendedStocks);
+router.get('/recommended/type', stockController.getRecommendedStocksByType);
+router.get('/recommended/summary', stockController.getRecommendationsSummary);
 
 
 // Créer une nouvelle action avec URL

@@ -26,15 +26,29 @@ const stockThresholdSchema = new mongoose.Schema({
   // Nouveau champ pour l'URL
   url: {
     type: String,
-    required: false, // Changé temporairement pour permettre les données existantes sans URL
+    required: false,
     trim: true,
     validate: {
       validator: function(v) {
-        if (!v) return true; // Permet les valeurs vides pour les données existantes
+        if (!v) return true;
         return /^https?:\/\/.+/.test(v);
       },
       message: 'URL invalide'
     }
+  },
+  // Nouveau champ pour l'indice de risque
+  riskLevel: {
+    type: String,
+    enum: ['faible', 'moyen', 'elevé', 'sevère'],
+    default: 'moyen',
+    required: true
+  },
+  // Nouveau champ pour le type d'action (acheter/vendre)
+  actionType: {
+    type: String,
+    enum: ['acheter', 'vendre'],
+    default: 'acheter',
+    required: true
   },
   // Champs pour stocker les données de prix
   currentPrice: {

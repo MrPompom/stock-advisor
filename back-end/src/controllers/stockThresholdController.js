@@ -31,7 +31,7 @@ exports.getThreshold = async (req, res) => {
 // Créer un nouveau seuil (version mise à jour avec URL)
 exports.createThreshold = async (req, res) => {
   try {
-    const { symbol, name, thresholdPrice, url, isActive } = req.body;
+    const { symbol, name, thresholdPrice, url, isActive, riskLevel, actionType } = req.body;
     
     // Vérification des données requises
     if (!symbol || !name || thresholdPrice === undefined || !url) {
@@ -49,10 +49,12 @@ exports.createThreshold = async (req, res) => {
       name,
       thresholdPrice,
       url,
-      isActive
+      isActive,
+      riskLevel: riskLevel || 'moyen', // Valeur par défaut
+      actionType: actionType || 'acheter' // Valeur par défaut
     });
 
-    console.log('Données reçues:', { symbol, name, thresholdPrice, url, isActive });
+    console.log('Données reçues:', { symbol, name, thresholdPrice, url, isActive, riskLevel, actionType });
     
     const savedThreshold = await newThreshold.save();
     
@@ -75,16 +77,17 @@ exports.createThreshold = async (req, res) => {
 };
 
 // Mettre à jour un seuil
-// Dans stockThresholdController.js
 exports.updateThreshold = async (req, res) => {
   try {
-    const { thresholdPrice, isActive, name, url } = req.body;
+    const { thresholdPrice, isActive, name, url, riskLevel, actionType } = req.body;
     const updates = {};
     
     if (thresholdPrice !== undefined) updates.thresholdPrice = thresholdPrice;
     if (isActive !== undefined) updates.isActive = isActive;
     if (name !== undefined) updates.name = name;
     if (url !== undefined) updates.url = url;
+    if (riskLevel !== undefined) updates.riskLevel = riskLevel;
+    if (actionType !== undefined) updates.actionType = actionType;
     
     const updatedThreshold = await StockThreshold.findByIdAndUpdate(
       req.params.id,
@@ -112,7 +115,7 @@ exports.updateThreshold = async (req, res) => {
     res.status(200).json(updatedThreshold);
   } catch (error) {
     logger.error(`Error updating threshold: ${error.message}`);
-    logger.error('Stack trace:', error.stack); // Ajout pour plus de détails
+    logger.error('Stack trace:', error.stack);
     res.status(500).json({ message: 'Erreur lors de la mise à jour du seuil', error: error.message });
   }
 };
