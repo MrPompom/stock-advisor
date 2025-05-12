@@ -357,7 +357,7 @@
           </div>
           
           <div class="form-group">
-            <label for="thresholdPrice">Seuil de Prix ($)</label>
+            <label for="thresholdPrice">Seuil de Prix (€)</label>
             <input 
               type="number" 
               id="thresholdPrice" 

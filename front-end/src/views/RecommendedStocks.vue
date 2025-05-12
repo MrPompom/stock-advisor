@@ -106,11 +106,11 @@
             <div class="price-info">
               <div class="price-item">
                 <span class="price-label">Prix actuel</span>
-                <span class="price-value">${{ formatPrice(stock.price) }}</span>
+                <span class="price-value">€{{ formatPrice(stock.price) }}</span>
               </div>
               <div class="price-item">
                 <span class="price-label">Seuil</span>
-                <span class="price-value">${{ formatPrice(stock.thresholdPrice) }}</span>
+                <span class="price-value">€{{ formatPrice(stock.thresholdPrice) }}</span>
               </div>
             </div>
             

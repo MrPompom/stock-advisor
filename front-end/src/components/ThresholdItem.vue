@@ -18,7 +18,7 @@
     <div class="threshold-info">
       <div class="threshold-price">
         <p class="price-label">Seuil de Prix</p>
-        <p class="price-value">${{ formatPrice(threshold.thresholdPrice) }}</p>
+        <p class="price-value">€{{ formatPrice(threshold.thresholdPrice) }}</p>
       </div>
       
       <!-- Nouveau: Affichage de l'indice de risque -->
