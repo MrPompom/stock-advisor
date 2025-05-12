@@ -90,16 +90,13 @@
         <div v-for="stock in filteredStocks" :key="stock.symbol" class="stock-card">
           <div class="stock-header">
             <div class="stock-title">
-              <h3 class="stock-symbol">{{ stock.symbol }}</h3>
-              <p class="stock-name">{{ stock.name }}</p>
+              <h3 class="stock-name">{{ stock.name }}</h3>
+              <p class="stock-symbol">{{ stock.symbol }}</p>
             </div>
             <div class="stock-badges">
               <span v-if="stock.isRecommended" class="status-badge recommended">Recommandé</span>
               <span class="action-badge" :class="stock.actionType || 'acheter'">
                 {{ stock.actionType === 'vendre' ? 'VENTE' : 'ACHAT' }}
-              </span>
-              <span class="risk-badge" :class="`risk-${stock.riskLevel || 'moyen'}`">
-                {{ capitalizeRisk(stock.riskLevel || 'moyen') }}
               </span>
             </div>
           </div>
@@ -115,6 +112,14 @@
                 <span class="price-label">Seuil</span>
                 <span class="price-value">${{ formatPrice(stock.thresholdPrice) }}</span>
               </div>
+            </div>
+            
+            <!-- Niveau de risque comme ligne -->
+            <div class="risk-info">
+              <span class="risk-label">Niveau de risque:</span>
+              <span class="risk-value" :class="`risk-${stock.riskLevel || 'moyen'}`">
+                {{ capitalizeRisk(stock.riskLevel || 'moyen') }}
+              </span>
             </div>
           </div>
           
@@ -269,7 +274,7 @@ export default {
 }
 
 .filters-stats {
-  background-color: #f7fafc;
+  background-color: white;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
@@ -361,19 +366,19 @@ export default {
 }
 
 .stock-symbol {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin: 0;
-  color: #2d3748;
+  font-size: 0.875rem;
+  color: #718096;
+  margin: 5px 0 0 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .stock-name {
-  font-size: 0.875rem;
-  color: #718096;
-  margin: 5px 0 0 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  color: #2d3748;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -387,7 +392,7 @@ export default {
   flex-shrink: 0;
 }
 
-.status-badge, .action-badge, .risk-badge {
+.status-badge, .action-badge {
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -411,26 +416,6 @@ export default {
   color: #e53e3e;
 }
 
-.risk-faible {
-  background-color: #c6f6d5;
-  color: #2f855a;
-}
-
-.risk-moyen {
-  background-color: #fefcbf;
-  color: #d69e2e;
-}
-
-.risk-elevé, .risk-eleve {
-  background-color: #fed7d7;
-  color: #e53e3e;
-}
-
-.risk-sevère, .risk-severe {
-  background-color: #e53e3e;
-  color: white;
-}
-
 .stock-body {
   margin-bottom: 15px;
   flex: 1;
@@ -444,7 +429,6 @@ export default {
 
 .price-item {
   text-align: center;
-  flex: 1;
 }
 
 .price-label {
@@ -463,6 +447,48 @@ export default {
 
 .price-value.no-price {
   color: #a0aec0;
+}
+
+/* Nouveau style pour la ligne de risque */
+.risk-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.risk-label {
+  font-size: 0.875rem;
+  color: #718096;
+  font-weight: 600;
+}
+
+.risk-value {
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.risk-faible {
+  background-color: #c6f6d5;
+  color: #2f855a;
+}
+
+.risk-moyen {
+  background-color: #fefcbf;
+  color: #d69e2e;
+}
+
+.risk-elevé, .risk-eleve {
+  background-color: #fed7d7;
+  color: #e53e3e;
+}
+
+.risk-sevère, .risk-severe {
+  background-color: #e53e3e;
+  color: white;
 }
 
 .stock-footer {

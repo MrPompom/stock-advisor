@@ -2,8 +2,8 @@
 <template>
     <div class="stock-item card" :class="{ 'recommended': stock.isRecommended }">
       <div class="stock-header">
-        <h3 class="stock-symbol">{{ stock.name }}</h3>
-        <p class="stock-name">{{ stock.symbol }}</p>
+        <h3 class="stock-name">{{ stock.name }}</h3>
+        <p class="stock-symbol">{{ stock.symbol }}</p>
       </div>
       <div class="stock-details">
         <div class="stock-price">
@@ -60,15 +60,15 @@
   }
   
   .stock-symbol {
-    font-size: 24px;
-    font-weight: 700;
-    margin: 0 0 5px 0;
-  }
-  
-  .stock-name {
     font-size: 16px;
     color: #718096;
     margin: 0;
+  }
+  
+  .stock-name {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 5px 0;
   }
   
   .stock-details {

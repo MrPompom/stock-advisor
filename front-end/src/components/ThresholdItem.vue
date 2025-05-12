@@ -11,8 +11,8 @@
     </div>
     
     <div class="threshold-header">
-      <h3 class="threshold-symbol">{{ threshold.symbol }}</h3>
-      <p class="threshold-name">{{ threshold.name }}</p>
+      <h3 class="threshold-name">{{ threshold.name }}</h3>
+      <p class="threshold-symbol">{{ threshold.symbol }}</p>
     </div>
     
     <div class="threshold-info">
@@ -136,15 +136,15 @@ export default {
 }
 
 .threshold-symbol {
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0 0 5px 0;
-}
-
-.threshold-name {
   font-size: 16px;
   color: #718096;
   margin: 0;
+}
+
+.threshold-name {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 5px 0;
 }
 
 .threshold-info {

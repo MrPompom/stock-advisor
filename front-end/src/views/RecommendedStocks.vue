@@ -92,15 +92,12 @@
         <div v-for="stock in filteredStocks" :key="stock.symbol" class="stock-card">
           <div class="stock-header">
             <div class="stock-title">
-              <h3 class="stock-symbol">{{ stock.symbol }}</h3>
-              <p class="stock-name">{{ stock.name }}</p>
+              <h3 class="stock-name">{{ stock.name }}</h3>
+              <p class="stock-symbol">{{ stock.symbol }}</p>
             </div>
             <div class="stock-badges">
               <span class="action-badge" :class="stock.actionType">
                 {{ stock.actionType === 'acheter' ? 'ACHAT' : 'VENTE' }}
-              </span>
-              <span class="risk-badge" :class="`risk-${stock.riskLevel}`">
-                {{ capitalizeRisk(stock.riskLevel) }}
               </span>
             </div>
           </div>
@@ -115,6 +112,14 @@
                 <span class="price-label">Seuil</span>
                 <span class="price-value">${{ formatPrice(stock.thresholdPrice) }}</span>
               </div>
+            </div>
+            
+            <!-- Niveau de risque comme ligne -->
+            <div class="risk-info">
+              <span class="risk-label">Niveau de risque:</span>
+              <span class="risk-value" :class="`risk-${stock.riskLevel || 'moyen'}`">
+                {{ capitalizeRisk(stock.riskLevel || 'moyen') }}
+              </span>
             </div>
           </div>
           
@@ -273,7 +278,7 @@ export default {
 }
 
 .filters-stats {
-  background-color: #f7fafc;
+  background-color: white;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
@@ -360,16 +365,16 @@ export default {
 }
 
 .stock-symbol {
+  font-size: 0.875rem;
+  color: #718096;
+  margin: 5px 0 0 0;
+}
+
+.stock-name {
   font-size: 1.25rem;
   font-weight: 700;
   margin: 0;
   color: #2d3748;
-}
-
-.stock-name {
-  font-size: 0.875rem;
-  color: #718096;
-  margin: 5px 0 0 0;
 }
 
 .stock-badges {
@@ -379,7 +384,7 @@ export default {
   justify-content: flex-end;
 }
 
-.action-badge, .risk-badge {
+.action-badge {
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -395,26 +400,6 @@ export default {
 .action-badge.vendre {
   background-color: #fed7d7;
   color: #e53e3e;
-}
-
-.risk-faible {
-  background-color: #c6f6d5;
-  color: #2f855a;
-}
-
-.risk-moyen {
-  background-color: #fefcbf;
-  color: #d69e2e;
-}
-
-.risk-elevé {
-  background-color: #fed7d7;
-  color: #e53e3e;
-}
-
-.risk-sevère {
-  background-color: #e53e3e;
-  color: white;
 }
 
 .stock-body {
@@ -445,34 +430,46 @@ export default {
   color: #2d3748;
 }
 
-.change-info {
+/* Nouveau style pour la ligne de risque */
+.risk-info {
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin-bottom: 10px;
+  gap: 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.risk-label {
+  font-size: 0.875rem;
+  color: #718096;
   font-weight: 600;
 }
 
-.change-info.positive {
-  color: #38a169;
+.risk-value {
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
 }
 
-.change-info.negative {
+.risk-faible {
+  background-color: #c6f6d5;
+  color: #2f855a;
+}
+
+.risk-moyen {
+  background-color: #fefcbf;
+  color: #d69e2e;
+}
+
+.risk-elevé, .risk-eleve {
+  background-color: #fed7d7;
   color: #e53e3e;
 }
 
-.change-icon {
-  font-size: 1.25rem;
-}
-
-.volume-info {
-  font-size: 0.875rem;
-  color: #718096;
-}
-
-.volume-value {
-  font-weight: 600;
-  margin-left: 5px;
+.risk-sevère, .risk-severe {
+  background-color: #e53e3e;
+  color: white;
 }
 
 .stock-footer {
